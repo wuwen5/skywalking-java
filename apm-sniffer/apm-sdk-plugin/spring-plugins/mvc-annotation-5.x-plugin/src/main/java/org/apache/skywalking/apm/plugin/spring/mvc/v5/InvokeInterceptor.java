@@ -18,15 +18,19 @@
 package org.apache.skywalking.apm.plugin.spring.mvc.v5;
 
 import org.apache.skywalking.apm.agent.core.context.ContextManager;
+import org.apache.skywalking.apm.agent.core.context.ContextSnapshot;
 import org.apache.skywalking.apm.agent.core.context.RuntimeContext;
 import org.apache.skywalking.apm.agent.core.context.tag.Tags;
 import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedInstance;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.v2.InstanceMethodsAroundInterceptorV2;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.v2.MethodInvocationContext;
+import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ServerWebExchangeDecorator;
+import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Method;
@@ -61,11 +65,31 @@ public class InvokeInterceptor implements InstanceMethodsAroundInterceptorV2 {
     @Override
     public Object afterMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes, Object ret, MethodInvocationContext context) throws Throwable {
         ServerWebExchange exchange = (ServerWebExchange) allArguments[0];
-        return ((Mono) ret).doFinally(s -> {
+        return ((Mono<?>) ret).subscriberContext(c -> {
+
+            EnhancedInstance instance = getInstance(exchange);
+            if (instance != null && instance.getSkyWalkingDynamicField() != null) {
+                AbstractSpan localSpan = ContextManager.createLocalSpan("SpringMVC/subscribe")
+                        .setComponent(ComponentsDefine.SPRING_MVC_ANNOTATION);
+                ContextManager.continued((ContextSnapshot) instance.getSkyWalkingDynamicField());
+
+                exchange.getAttributes().put("SKYWALKING_SPAN_LOCAL", localSpan);
+                localSpan.prepareForAsync();
+            }
+
+            return c;
+        }).doFinally(s -> {
             Object ctx = context.getContext();
             if (ctx == null) {
                 return;
             }
+
+            AbstractSpan spanLocal = (AbstractSpan) exchange.getAttributes().get("SKYWALKING_SPAN_LOCAL");
+            if (spanLocal != null) {
+                spanLocal.asyncFinish();
+                ContextManager.stopSpan();
+            }
+
             AbstractSpan span = ((AbstractSpan[]) ctx)[0];
             if (span == null) {
                 return;
@@ -84,5 +108,16 @@ public class InvokeInterceptor implements InstanceMethodsAroundInterceptorV2 {
     @Override
     public void handleMethodException(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes, Throwable t, MethodInvocationContext context) {
 
+    }
+
+    private static EnhancedInstance getInstance(Object o) {
+        EnhancedInstance instance = null;
+        if (o instanceof DefaultServerWebExchange && o instanceof EnhancedInstance) {
+            instance = (EnhancedInstance) o;
+        } else if (o instanceof ServerWebExchangeDecorator) {
+            ServerWebExchange delegate = ((ServerWebExchangeDecorator) o).getDelegate();
+            return getInstance(delegate);
+        }
+        return instance;
     }
 }
