@@ -131,6 +131,7 @@ public class RoutingHandlerInterceptorTest {
         exchange.setDestinationAddress(new InetSocketAddress("localhost", 8080));
         exchange.setRequestScheme("http");
         exchange.setRequestMethod(Methods.GET);
+        exchange.setSourceAddress(new InetSocketAddress("localhost", 9999));
         return exchange;
     }
 
