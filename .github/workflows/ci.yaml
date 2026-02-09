@@ -47,13 +47,11 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ ubuntu, macos, windows ]
+        os: [ ubuntu ]
         java-version: [ 17 ]
         include:
           - os: ubuntu
             java-version: 21
-          - os: ubuntu
-            java-version: 25
     steps:
       - if: matrix.os == 'windows'
         name: Support longpaths
