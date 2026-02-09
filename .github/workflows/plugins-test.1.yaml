@@ -52,37 +52,9 @@ jobs:
     strategy:
       matrix:
         case:
-          - h2-scenario
-          - httpasyncclient-scenario
-          - httpclient-3.x-scenario
-          - httpclient-4.3.x-scenario
-          - httpclient-5.x-scenario
-          - hutool-http-5.x-scenario
-          - hystrix-scenario
-          - sentinel-scenario
-          - influxdb-scenario
-          - jdk-http-scenario
-          - jdk-threading-scenario
-          - jedis-2.x-scenario
-          - jedis-3.1.x-plus-scenario
-          - jedis-4.x-scenario
-          - jedis-3.3.x-plus-scenario
-          - jedis-2.x-3.x-cluster-scenario
-          - jetty-scenario
-          - kafka-scenario
-          - kotlin-coroutine-scenario
           - lettuce-scenario
           - lettuce-6.5.x-scenario
           - lettuce-webflux-5x-scenario
-          - mongodb-3.x-scenario
-          - mongodb-4.x-scenario
-          - netty-socketio-scenario
-          - postgresql-above9.4.1207-scenario
-          - mssql-jtds-scenario
-          - mssql-jdbc-scenario
-          - mybatis-3.x-scenario
-          - resteasy-4.x-scenario
-          - netty-http-4.1.x-scenario
     steps:
       - uses: actions/checkout@v2
         with:

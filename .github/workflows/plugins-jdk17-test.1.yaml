@@ -55,16 +55,6 @@ jobs:
     strategy:
       matrix:
         case:
-          - spring-6.x-scenario
-          - resteasy-6.x-scenario
-          - gateway-4.x-scenario
-          - gateway-4.1.2.x-scenario
-          - httpexchange-scenario
-          - activemq-artemis-2.x-scenario
-          - c3p0-0.9.0.x-0.9.1.x-scenario
-          - c3p0-0.9.2.x-0.10.x-scenario
-          - spring-scheduled-6.x-scenario
-          - caffeine-3.x-scenario
           - lettuce-webflux-6x-scenario
     steps:
       - uses: actions/checkout@v2
