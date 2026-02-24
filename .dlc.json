@@ -33,8 +33,8 @@
   ],
   "timeout": "10s",
   "retryOn429": true,
-  "retryCount": 1,
-  "fallbackRetryDelay": "10s",
+  "retryCount": 10,
+  "fallbackRetryDelay": "60s",
   "aliveStatusCodes": [
     200,
     301,
