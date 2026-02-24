@@ -69,7 +69,7 @@ jobs:
       - name: Check Javaagent Plugin List
         run: tools/plugin/check-javaagent-plugin-list.sh
       - name: test
-        run: MAVEN_OPTS="-XX:+PrintCommandLineFlags -Xlog:gc+full=info" ./mvnw -v -q --batch-mode clean verify install
+        run: MAVEN_OPTS="-XX:+PrintCommandLineFlags -Xlog:gc" ./mvnw -v -q --batch-mode clean verify install
       - name: test-macos
         run: vm_stat
         if: matrix.os == 'macos'
