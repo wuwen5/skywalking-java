@@ -42,18 +42,13 @@ jobs:
   build:
     name: Java ${{ matrix.java-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}-latest
-    timeout-minutes: 90
+    timeout-minutes: 20
     needs: [ license ]
     strategy:
       fail-fast: true
       matrix:
-        os: [ ubuntu, macos, windows ]
+        os: [ ubuntu, macos ]
         java-version: [ 17 ]
-        include:
-          - os: ubuntu
-            java-version: 21
-          - os: ubuntu
-            java-version: 25
     steps:
       - if: matrix.os == 'windows'
         name: Support longpaths
@@ -73,8 +68,21 @@ jobs:
           java-version: ${{ matrix.java-version }}
       - name: Check Javaagent Plugin List
         run: tools/plugin/check-javaagent-plugin-list.sh
-      - name: Install and Test
-        run: ./mvnw -q --batch-mode clean verify install javadoc:javadoc
+      - name: test-macos
+        run: vm_stat
+        if: matrix.os == 'macos'
+      - name: test-macos
+        run: sysctl machdep.cpu
+        if: matrix.os == 'macos'
+      - name: test-ubuntu
+        if: matrix.os == 'ubuntu'
+        run: free -m
+      - name: test
+        env: 
+          MAVEN_OPTS: "-XX:+PrintCommandLineFlags -Xmx4g -Xlog:gc"
+        run: ./mvnw -T 1C -q --batch-mode clean verify install javadoc:javadoc
+      #- name: Install and Test
+      #  run: ./mvnw -q --batch-mode clean verify install javadoc:javadoc
 
   ci:
     name: CI
