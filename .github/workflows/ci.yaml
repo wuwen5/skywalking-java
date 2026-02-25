@@ -68,10 +68,6 @@ jobs:
           java-version: ${{ matrix.java-version }}
       - name: Check Javaagent Plugin List
         run: tools/plugin/check-javaagent-plugin-list.sh
-      #- name: test
-      #  env: 
-      #    MAVEN_OPTS: "-XX:+PrintCommandLineFlags -Xmx4g -Xlog:gc"
-      #  run: ./mvnw -q --batch-mode clean verify install javadoc:javadoc
       - name: test-macos
         run: vm_stat
         if: matrix.os == 'macos'
@@ -81,6 +77,10 @@ jobs:
       - name: test-ubuntu
         if: matrix.os == 'ubuntu'
         run: free -m
+      - name: test
+        env: 
+          MAVEN_OPTS: "-XX:+PrintCommandLineFlags -Xmx4g -Xlog:gc"
+        run: ./mvnw -T 1C -q --batch-mode clean verify install javadoc:javadoc
       #- name: Install and Test
       #  run: ./mvnw -q --batch-mode clean verify install javadoc:javadoc
 
