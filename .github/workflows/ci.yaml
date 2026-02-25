@@ -42,7 +42,7 @@ jobs:
   build:
     name: Java ${{ matrix.java-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}-latest
-    timeout-minutes: 90
+    timeout-minutes: 20
     needs: [ license ]
     strategy:
       fail-fast: true
@@ -74,6 +74,9 @@ jobs:
         run: ./mvnw -q --batch-mode clean verify install javadoc:javadoc
       - name: test-macos
         run: vm_stat
+        if: matrix.os == 'macos'
+      - name: test-macos
+        run: sysctl machdep.cpu
         if: matrix.os == 'macos'
       - name: test-ubuntu
         if: matrix.os == 'ubuntu'
